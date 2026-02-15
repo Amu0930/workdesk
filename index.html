@@ -177,6 +177,48 @@
       font-weight: 560;
     }
 
+    /* 轻量的登录状态区（放在 hero 右侧，不改布局） */
+    .authMini{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-end;
+      min-width: 180px;
+    }
+    .authMini .line{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .authMini .state{
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 12px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 6px 10px;
+      border-radius: 999px;
+      max-width: 260px;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .authMini .btnMini{
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--txt);
+      font-weight: 900;
+      font-size: 12px;
+      cursor:pointer;
+      user-select:none;
+      transition:.18s ease;
+    }
+    .authMini .btnMini:hover{background: rgba(255,255,255,.07); transform: translateY(-1px);}
+
     .clocks{
       display:grid;
       grid-template-columns: repeat(4, minmax(160px, 1fr));
@@ -343,6 +385,23 @@
     }
     .go:hover{transform: translateY(-1px); background: rgba(255,255,255,.07)}
     .go span{opacity:.85; font-size:14px}
+
+    /* TikTok portal helper line */
+    .portalHint{
+      margin: 2px 4px 10px;
+      color: var(--muted2);
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.4;
+    }
+    .portalToolbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      margin: 0 0 10px;
+      flex-wrap:wrap;
+    }
 
     /* VPN + Apple row */
     .row2{
@@ -647,6 +706,93 @@
       font-size: 12px;
     }
 
+    /* ✅ Auth Modal（替换 prompt 门禁，不动其它模块） */
+    .authMask{
+      position: fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+      display:none;
+      z-index: 200;
+    }
+    .authModal{
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 420px;
+      max-width: calc(100vw - 36px);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      display:none;
+      z-index: 210;
+      overflow:hidden;
+    }
+    .authTop{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .authTop .ttl{
+      font-weight: 950;
+      letter-spacing:.2px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .authBody{padding: 12px;}
+    .authHint{
+      color: var(--muted);
+      font-weight: 750;
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 2px 2px 10px;
+    }
+    .authField{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top: 10px;
+    }
+    .authLabel{
+      color: var(--muted2);
+      font-weight: 850;
+      font-size: 12px;
+      margin-left: 2px;
+    }
+    .authInput{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.20);
+      color: var(--txt);
+      padding: 10px 12px;
+      outline:none;
+      font-weight: 750;
+    }
+    .authInput::placeholder{color: rgba(255,255,255,.40)}
+    .authActions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      margin-top: 12px;
+      flex-wrap:wrap;
+    }
+    .authErr{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(248, 113, 113, .12);
+      border: 1px solid rgba(248, 113, 113, .25);
+      color: rgba(255,255,255,.92);
+      font-weight: 800;
+      font-size: 12px;
+      display:none;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
     /* Helpers */
     .spacer{height: 18px;}
     .anchor{scroll-margin-top: 18px;}
@@ -678,6 +824,17 @@
             <div>
               <h1 class="h1">🚀 All in one 工作台</h1>
               <div class="sub">仅海外事业部内部使用</div>
+            </div>
+
+            <!-- ✅ 登录状态（新增：不改你现有风格/布局） -->
+            <div class="authMini" aria-label="登录状态">
+              <div class="line">
+                <div class="state" id="authState">未登录</div>
+              </div>
+              <div class="line">
+                <button class="btnMini" id="btnOpenLogin">登录</button>
+                <button class="btnMini" id="btnLogout" style="display:none;">退出</button>
+              </div>
             </div>
           </div>
 
@@ -762,69 +919,55 @@
         <section id="sec-portal" class="anchor">
           <div class="secTitle"><span class="emoji">📜</span> TikTok账号传送门</div>
 
+          <!-- ✅ 不改布局：只加一个小工具条（登录/刷新提示） -->
+          <div class="portalToolbar">
+            <div class="pill" id="portalPill">未登录 · 账号列表未加载</div>
+            <button class="btn" id="portalRefreshBtn">刷新账号</button>
+          </div>
+
           <div class="portalGrid">
             <!-- US -->
             <div class="portalCol">
               <div class="portalTop"><span class="flag">🇺🇸</span><span class="region">美国</span></div>
-
-              <div class="portalGroupTitle">自营账号</div>
-              <div class="acctList">
-                <div class="acctRow">
-                  <span class="badge">官号</span>
-                  <span class="handle">@youpure_official</span>
-                  <div class="go" data-open="https://www.tiktok.com/@youpure_official" title="打开"><span>↗</span></div>
-                </div>
-                <div class="acctRow">
-                  <span class="badge">渠道号</span>
-                  <span class="handle">@alice.love.u0</span>
-                  <div class="go" data-open="https://www.tiktok.com/@alice.love.u0" title="打开"><span>↗</span></div>
-                </div>
-                <div class="acctRow">
-                  <span class="badge">橱窗号</span>
-                  <span class="handle">@user210518057249868</span>
-                  <div class="go" data-open="https://www.tiktok.com/@user210518057249868" title="打开"><span>↗</span></div>
-                </div>
-                <div class="acctRow">
-                  <span class="badge">报白号</span>
-                  <span class="handle">@hnckuyd2m0</span>
-                  <div class="go" data-open="https://www.tiktok.com/@hnckuyd2m0" title="打开"><span>↗</span></div>
-                </div>
-                <div class="acctRow">
-                  <span class="badge">报白号</span>
-                  <span class="handle">@smqnfajfm6</span>
-                  <div class="go" data-open="https://www.tiktok.com/@smqnfajfm6" title="打开"><span>↗</span></div>
-                </div>
+              <div id="portal-US">
+                <div class="portalGroupTitle">自营账号</div>
+                <div class="portalHint">（请登录后加载）</div>
+                <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
+                <div class="portalHint">（请登录后加载）</div>
               </div>
-
-              <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
-              <div class="small">（待补充）</div>
             </div>
 
             <!-- SG -->
             <div class="portalCol">
               <div class="portalTop"><span class="flag">🇸🇬</span><span class="region">新加坡</span></div>
-              <div class="portalGroupTitle">自营账号</div>
-              <div class="small">（待补充）</div>
-              <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
-              <div class="small">（待补充）</div>
+              <div id="portal-SG">
+                <div class="portalGroupTitle">自营账号</div>
+                <div class="portalHint">（请登录后加载）</div>
+                <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
+                <div class="portalHint">（请登录后加载）</div>
+              </div>
             </div>
 
             <!-- VN -->
             <div class="portalCol">
               <div class="portalTop"><span class="flag">🇻🇳</span><span class="region">越南</span></div>
-              <div class="portalGroupTitle">自营账号</div>
-              <div class="small">（待补充）</div>
-              <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
-              <div class="small">（待补充）</div>
+              <div id="portal-VN">
+                <div class="portalGroupTitle">自营账号</div>
+                <div class="portalHint">（请登录后加载）</div>
+                <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
+                <div class="portalHint">（请登录后加载）</div>
+              </div>
             </div>
 
             <!-- MY -->
             <div class="portalCol">
               <div class="portalTop"><span class="flag">🇲🇾</span><span class="region">马来西亚</span></div>
-              <div class="portalGroupTitle">自营账号</div>
-              <div class="small">（待补充）</div>
-              <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
-              <div class="small">（待补充）</div>
+              <div id="portal-MY">
+                <div class="portalGroupTitle">自营账号</div>
+                <div class="portalHint">（请登录后加载）</div>
+                <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
+                <div class="portalHint">（请登录后加载）</div>
+              </div>
             </div>
           </div>
         </section>
@@ -997,6 +1140,37 @@
     </div>
   </div>
 
+  <!-- ✅ Auth Gate（替换 prompt） -->
+  <div class="authMask" id="authMask"></div>
+  <div class="authModal" id="authModal" role="dialog" aria-modal="true" aria-label="登录">
+    <div class="authTop">
+      <div class="ttl">🔐 登录工作台</div>
+      <div class="x" id="authClose" title="关闭">✕</div>
+    </div>
+    <div class="authBody">
+      <div class="authHint">使用 Supabase 账号登录。登录后将自动加载「TikTok账号传送门」。</div>
+
+      <div class="authField">
+        <div class="authLabel">邮箱</div>
+        <input class="authInput" id="authEmail" placeholder="例如：name@company.com" autocomplete="username" />
+      </div>
+
+      <div class="authField">
+        <div class="authLabel">密码</div>
+        <input class="authInput" id="authPassword" type="password" placeholder="请输入密码" autocomplete="current-password" />
+      </div>
+
+      <div class="authActions">
+        <button class="btn" id="authLoginBtn">登录</button>
+      </div>
+
+      <div class="authErr" id="authErr"></div>
+    </div>
+  </div>
+
+  <!-- ✅ Supabase JS（CDN，不需要安装任何东西） -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
     /********************
      * 0) Config
@@ -1004,6 +1178,39 @@
     // 你的 Cloudflare Worker 地址（后面你部署好后，把它替换成真实 URL）
     // 例如：https://aio-news.yourname.workers.dev/news
     const NEWS_API_URL = ""; // <-- 这里必填
+
+    // ✅ Supabase（只用于 登录 + tiktok_accounts 读取）
+    const SUPABASE_URL = "https://wzdziscgnzinwpuoqnge.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZHppc2NnbnppbndwdW9xbmdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNDg4MTcsImV4cCI6MjA4NjcyNDgxN30.L3CYmSpWgUL0ftQ1bIfchsIb7WBmWotiipUTPHHQla8";
+
+    // 账号分类显示名（尽量兼容你可能填的值）
+    function prettyAccountType(v){
+      const s = String(v || "").trim().toLowerCase();
+      // 常见：自营/达人
+      if(s === "自营" || s === "self" || s === "owned" || s === "inhouse") return "自营账号";
+      if(s === "达人" || s === "creator" || s === "affiliate" || s === "koc" || s === "kol") return "达人账号";
+      // 兜底：原样展示
+      return v ? String(v) : "账号";
+    }
+
+    // 地区规范化：US/SG/VN/MY（兼容你可能填“美国/新加坡”等）
+    function normRegion(v){
+      const s = String(v || "").trim().toUpperCase();
+      if(s === "US" || s === "USA" || s.includes("美") || s.includes("UNITED")) return "US";
+      if(s === "SG" || s.includes("新") || s.includes("SING")) return "SG";
+      if(s === "VN" || s.includes("越") || s.includes("VIET")) return "VN";
+      if(s === "MY" || s.includes("马") || s.includes("MALAY")) return "MY";
+      return s || "US";
+    }
+
+    // handle -> 生成打开链接
+    function handleToUrl(handle){
+      const h = String(handle || "").trim();
+      if(!h) return "";
+      if(/^https?:\/\//i.test(h)) return h;
+      const clean = h.startsWith("@") ? h.slice(1) : h;
+      return "https://www.tiktok.com/@" + encodeURIComponent(clean);
+    }
 
     /********************
      * 1) Clocks (LA / SG / VN / MY)
@@ -1087,17 +1294,7 @@
     sections.forEach(s=>io.observe(s));
 
     /********************
-     * 4) TikTok portal open
-     ********************/
-    document.querySelectorAll('.go[data-open]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const url = btn.getAttribute('data-open');
-        if(url) window.open(url, '_blank', 'noopener');
-      });
-    });
-
-    /********************
-     * 5) Copy helper (Apple IDs)
+     * 4) Copy helper (Apple IDs)
      ********************/
     async function copyText(text){
       try{
@@ -1125,7 +1322,7 @@
     });
 
     /********************
-     * 6) ToDo (localStorage, per-browser independent)
+     * 5) ToDo (localStorage, per-browser independent)
      ********************/
     const TODO_KEY = "aio_todos_v1";
     const fab = document.getElementById('todoFab');
@@ -1238,7 +1435,7 @@
     closeBtn.addEventListener('click', closeTodo);
 
     /********************
-     * 7) News (AI summary via Worker)
+     * 6) News (AI summary via Worker)
      ********************/
     const stampEl = document.getElementById('newsStamp');
     const bulletsEl = document.getElementById('newsBullets');
@@ -1304,15 +1501,310 @@
     loadNews();
 
     /********************
-     * 8) Password gate (保留你之前的方式)
+     * 7) Supabase Auth + TikTok Accounts
      ********************/
-    // 如果你不想要密码弹窗，可以把下面这段注释掉
-    const PASSWORD = "YouPure2026";
-    const inputPwd = prompt("请输入工作台密码：");
-    if(inputPwd !== PASSWORD){
-      alert("密码错误，无权限访问。");
-      location.href="about:blank";
+    const authStateEl = document.getElementById('authState');
+    const btnOpenLogin = document.getElementById('btnOpenLogin');
+    const btnLogout = document.getElementById('btnLogout');
+
+    const portalPill = document.getElementById('portalPill');
+    const portalRefreshBtn = document.getElementById('portalRefreshBtn');
+
+    const authMask = document.getElementById('authMask');
+    const authModal = document.getElementById('authModal');
+    const authClose = document.getElementById('authClose');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authLoginBtn = document.getElementById('authLoginBtn');
+    const authErr = document.getElementById('authErr');
+
+    // 初始化 Supabase client
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+
+    function showAuthError(msg){
+      authErr.style.display = "block";
+      authErr.textContent = msg || "登录失败";
     }
+    function clearAuthError(){
+      authErr.style.display = "none";
+      authErr.textContent = "";
+    }
+
+    function openAuthModal(force=true){
+      // force=true：作为门禁显示（不允许点遮罩关闭）
+      authMask.style.display = "block";
+      authModal.style.display = "block";
+      authClose.style.display = force ? "none" : "grid";
+      authMask.dataset.force = force ? "1" : "0";
+      clearAuthError();
+      setTimeout(()=> authEmail.focus(), 60);
+      document.body.style.overflow = "hidden";
+    }
+    function closeAuthModal(){
+      authMask.style.display = "none";
+      authModal.style.display = "none";
+      clearAuthError();
+      document.body.style.overflow = "";
+    }
+
+    // 点击遮罩：只有非强制模式才允许关闭
+    authMask.addEventListener('click', ()=>{
+      if(authMask.dataset.force === "1") return;
+      closeAuthModal();
+    });
+    authClose.addEventListener('click', closeAuthModal);
+
+    btnOpenLogin.addEventListener('click', ()=>{
+      openAuthModal(false);
+    });
+
+    authLoginBtn.addEventListener('click', doLogin);
+    authPassword.addEventListener('keydown', (e)=>{
+      if(e.key === "Enter") doLogin();
+    });
+
+    async function doLogin(){
+      clearAuthError();
+      const email = (authEmail.value || "").trim();
+      const password = (authPassword.value || "").trim();
+
+      if(!email || !password){
+        showAuthError("请填写邮箱和密码。");
+        return;
+      }
+
+      authLoginBtn.disabled = true;
+      authLoginBtn.textContent = "登录中…";
+
+      try{
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if(error) throw error;
+
+        closeAuthModal();
+        await refreshAuthUI();
+        await loadTikTokAccounts(); // 登录后自动加载
+      }catch(err){
+        showAuthError(err && err.message ? err.message : String(err));
+      }finally{
+        authLoginBtn.disabled = false;
+        authLoginBtn.textContent = "登录";
+      }
+    }
+
+    btnLogout.addEventListener('click', async ()=>{
+      btnLogout.disabled = true;
+      try{
+        await supabaseClient.auth.signOut();
+      }catch(e){
+        // 不用 alert
+      }finally{
+        btnLogout.disabled = false;
+        await refreshAuthUI();
+        // 退出后清空 portal 显示
+        renderPortalEmpty();
+        openAuthModal(true);
+      }
+    });
+
+    // 门禁策略：未登录 -> 强制显示登录弹窗（替代 prompt）
+    async function refreshAuthUI(){
+      const { data } = await supabaseClient.auth.getSession();
+      const session = data && data.session ? data.session : null;
+
+      if(session && session.user){
+        const email = session.user.email || "已登录";
+        authStateEl.textContent = `已登录：${email}`;
+        btnLogout.style.display = "inline-block";
+        btnOpenLogin.style.display = "none";
+        portalPill.textContent = "已登录 · 可加载账号列表";
+      }else{
+        authStateEl.textContent = "未登录";
+        btnLogout.style.display = "none";
+        btnOpenLogin.style.display = "inline-block";
+        portalPill.textContent = "未登录 · 账号列表未加载";
+      }
+      return session;
+    }
+
+    function renderPortalEmpty(){
+      const regions = ["US","SG","VN","MY"];
+      regions.forEach(r=>{
+        const root = document.getElementById("portal-" + r);
+        if(!root) return;
+        root.innerHTML = `
+          <div class="portalGroupTitle">自营账号</div>
+          <div class="portalHint">（请登录后加载）</div>
+          <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
+          <div class="portalHint">（请登录后加载）</div>
+        `;
+      });
+    }
+
+    function acctRowHTML(tag, handle){
+      const badge = esc(tag || "账号");
+      const h = esc(handle || "");
+      const url = handleToUrl(handle);
+      const openAttr = url ? `data-open="${esc(url)}"` : "";
+      return `
+        <div class="acctRow">
+          <span class="badge">${badge}</span>
+          <span class="handle">${h || "-"}</span>
+          <div class="go" ${openAttr} title="打开"><span>↗</span></div>
+        </div>
+      `;
+    }
+
+    function attachGoHandlers(scopeEl){
+      scopeEl.querySelectorAll('.go[data-open]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const url = btn.getAttribute('data-open');
+          if(url) window.open(url, '_blank', 'noopener');
+        });
+      });
+    }
+
+    function groupAccounts(rows){
+      // rows: [{region, account_type, tag, handle, sort_order, is_active}]
+      const byRegion = { US: [], SG: [], VN: [], MY: [] };
+      rows.forEach(r=>{
+        const reg = normRegion(r.region);
+        if(!byRegion[reg]) byRegion[reg] = [];
+        byRegion[reg].push(r);
+      });
+      return byRegion;
+    }
+
+    function splitByType(list){
+      const map = new Map();
+      list.forEach(it=>{
+        const key = prettyAccountType(it.account_type);
+        if(!map.has(key)) map.set(key, []);
+        map.get(key).push(it);
+      });
+      return map; // title -> items
+    }
+
+    async function loadTikTokAccounts(){
+      // 必须已登录，否则直接提示
+      const { data } = await supabaseClient.auth.getSession();
+      const session = data && data.session ? data.session : null;
+      if(!session){
+        portalPill.textContent = "未登录 · 请先登录";
+        renderPortalEmpty();
+        openAuthModal(true);
+        return;
+      }
+
+      portalPill.textContent = "加载中…";
+      portalRefreshBtn.disabled = true;
+
+      try{
+        // 只读字段：id, region, account_type, tag, handle, sort_order, is_active, created_at
+        const { data: rows, error } = await supabaseClient
+          .from("tiktok_accounts")
+          .select("id, region, account_type, tag, handle, sort_order, is_active, created_at")
+          .eq("is_active", true)
+          .order("region", { ascending: true })
+          .order("account_type", { ascending: true })
+          .order("sort_order", { ascending: true });
+
+        if(error) throw error;
+
+        const list = Array.isArray(rows) ? rows : [];
+        const grouped = groupAccounts(list);
+
+        ["US","SG","VN","MY"].forEach(r=>{
+          const root = document.getElementById("portal-" + r);
+          if(!root) return;
+
+          const items = grouped[r] || [];
+          if(items.length === 0){
+            root.innerHTML = `
+              <div class="portalGroupTitle">自营账号</div>
+              <div class="portalHint">（暂无）</div>
+              <div class="portalGroupTitle" style="margin-top:12px;">达人账号</div>
+              <div class="portalHint">（暂无）</div>
+            `;
+            return;
+          }
+
+          const byType = splitByType(items);
+
+          // 我们尽量维持你原本的“自营账号 / 达人账号”两个组。
+          // 如果表里还有其他 account_type，会追加在下面（不改变列/卡的整体布局）。
+          const preferredOrder = ["自营账号","达人账号"];
+
+          let html = "";
+          preferredOrder.forEach(ttl=>{
+            const arr = byType.get(ttl) || [];
+            html += `<div class="portalGroupTitle">${esc(ttl)}</div>`;
+            if(arr.length === 0){
+              html += `<div class="portalHint">（暂无）</div>`;
+            }else{
+              html += `<div class="acctList">` + arr.map(a => acctRowHTML(a.tag, a.handle)).join("") + `</div>`;
+            }
+            html += `<div style="height:12px;"></div>`;
+          });
+
+          // 追加其他类型（如果存在）
+          for(const [ttl, arr] of byType.entries()){
+            if(preferredOrder.includes(ttl)) continue;
+            html += `<div class="portalGroupTitle">${esc(ttl)}</div>`;
+            html += `<div class="acctList">` + arr.map(a => acctRowHTML(a.tag, a.handle)).join("") + `</div>`;
+            html += `<div style="height:12px;"></div>`;
+          }
+
+          root.innerHTML = html.replace(/<div style="height:12px;"><\/div>\s*$/,"");
+          attachGoHandlers(root);
+        });
+
+        portalPill.textContent = `已加载 · 共 ${list.length} 个账号`;
+      }catch(err){
+        portalPill.textContent = "加载失败";
+        // 用 portal 内提示，不用 alert
+        ["US","SG","VN","MY"].forEach(r=>{
+          const root = document.getElementById("portal-" + r);
+          if(!root) return;
+          root.innerHTML = `
+            <div class="portalGroupTitle">提示</div>
+            <div class="portalHint">账号加载失败：${esc(err && err.message ? err.message : String(err))}</div>
+            <div class="portalHint">请检查：1）RLS/Policy 是否正确；2）你是否已登录；3）表里 region/account_type 值是否规范。</div>
+          `;
+        });
+      }finally{
+        portalRefreshBtn.disabled = false;
+      }
+    }
+
+    portalRefreshBtn.addEventListener('click', loadTikTokAccounts);
+
+    // 监听登录状态变化
+    supabaseClient.auth.onAuthStateChange(async (_event, _session)=>{
+      const sess = await refreshAuthUI();
+      if(sess){
+        // 已登录就尝试加载
+        await loadTikTokAccounts();
+      }
+    });
+
+    // 初始：检查 session；未登录则强制显示登录弹窗（替代 prompt 门禁）
+    (async function bootAuth(){
+      const sess = await refreshAuthUI();
+      if(!sess){
+        renderPortalEmpty();
+        openAuthModal(true);
+      }else{
+        // 已登录直接加载
+        await loadTikTokAccounts();
+      }
+    })();
+
   </script>
 </body>
 </html>
